@@ -139,12 +139,13 @@ Question: {query}"""
 
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     resp = client.messages.create(
-        model="claude-3-5-haiku-20241022",
-        max_tokens=1024,
+        model="claude-haiku-5-5",
+        max_tokens=4096,  # thinking counts against this
         messages=[{"role": "user", "content": prompt}]
     )
 
-    answer = resp.content[0].text
+    # the first block can be a thinking block, so take the text ones
+    answer = "".join(b.text for b in resp.content if b.type == "text")
     sources = list(set(c["source"] for c in chunks))
 
     return {"answer": answer, "sources": sources, "chunks": chunks}
